@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-// This function stores an individual plant's state.
+// This function stores an individual plant's state, and creates a new plant
 
 const storePlantState = () => {
   let currentState = {};
@@ -10,8 +10,11 @@ const storePlantState = () => {
     return newState;
   };
 };
+const plantControl = storePlantState();
 
-// This is a function factory, whose innermost return function gets passed into the return function of storePlantState, and becomes the stateChangeFunction. We can easily create more specific functions that alter a plant's soil, water, and light to varying degrees.
+
+// This is a function factory, whose innermost return function gets passed into the return function of storePlantState, and becomes the //! stateChangeFunction.
+//We can easily create more specific functions that alter a plant's soil, water, and light to varying degrees.
 
 const changePlantState = (prop) => {
   return (value) => {
@@ -32,6 +35,7 @@ const storeListState = () => {
     return newState;
   };
 };
+const listControl = storeListState();
 
 // This is a function factory, whose return function gets passed into the return function of storeListState, and becomes the stateChangeFunction.
 
@@ -46,12 +50,9 @@ const blueFood = changePlantState("soil")(5);
 
 $(document).ready(function () {
 
-  const listControl = storeListState();
-
   $('#new-plant').click(function() {
-    const plantControl = storePlantState();
     const addPlant = changeListState(plantControl);
-    const newList = listControl(addPlant);
+    const newList = listControl(addPlant); // calls the return of storeListState using changeListState
     $("#soil-value").append(`
       <div>
         <p id="soil-value-${newList.length - 1}"></p>
@@ -60,12 +61,15 @@ $(document).ready(function () {
     `);
   });
   
-  // This function has side effects because we are using jQuery. Manipulating the DOM will always be a side effect. Note that we only use one of our functions to alter soil. You can easily add more.
-  
   $('#feed').click(function() {
     const id = $('#plantNumber').val();
     const stateControl = listControl()[id];
     const newState = stateControl(blueFood);
     $(`#soil-value-${id}`).text(`Soil: ${newState.soil}`);
+  });
+
+  $('#show-state').click(function() {
+    $(`#soil-value`).text(`${listControl()}`);
+
   });
 });
