@@ -49,14 +49,13 @@ $(document).ready(function () {
   const listControl = storeListState();
 
   $('#new-plant').click(function() {
-    console.log("Hello");
     const plantControl = storePlantState();
     const addPlant = changeListState(plantControl);
     const newList = listControl(addPlant);
     $("#soil-value").append(`
       <div>
-        <p id=”soil-value-${newList.length - 1}”></p>
-        <p id=”feed-${newList.length - 1}” >Feed-${newList.length - 1}</p>
+        <p id="soil-value-${newList.length - 1}"></p>
+        <p id="feed-${newList.length - 1}">Plant-${newList.length - 1}</p>
       </div>
     `);
   });
@@ -64,15 +63,9 @@ $(document).ready(function () {
   // This function has side effects because we are using jQuery. Manipulating the DOM will always be a side effect. Note that we only use one of our functions to alter soil. You can easily add more.
   
   $('#feed').click(function() {
-    console.log("Matt");
     const id = $('#plantNumber').val();
-    console.log(id);
     const stateControl = listControl()[id];
-    console.log(stateControl);
     const newState = stateControl(blueFood);
-    console.log(newState);
-    $(`#soil-value-${id}`).val(`Soil: ${newState.soil}`);
-    console.log($(`#soil-value-${id}`).val());
+    $(`#soil-value-${id}`).text(`Soil: ${newState.soil}`);
   });
-
 });
