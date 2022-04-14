@@ -1,78 +1,78 @@
 import $ from "jquery";
 
-// This function stores our state.
-const storeState = () => {
+// This function stores an individual plant's state.
+
+const storePlantState = () => {
   let currentState = {};
-  return (stateChangeFunction = (state) => state) => {
+  return (stateChangeFunction = state => state) => {
     const newState = stateChangeFunction(currentState);
-    currentState = { ...newState };
+    currentState = {...newState};
     return newState;
   };
 };
 
-const plants = [];
-//first default plant
-plants.push(storeState());
+// This is a function factory, whose innermost return function gets passed into the return function of storePlantState, and becomes the stateChangeFunction. We can easily create more specific functions that alter a plant's soil, water, and light to varying degrees.
 
-// const stateControl = storeState();
-
-// This is a function factory. We can easily create more specific functions that alter a plant's soil, water, and light to varying degrees.
-
-const changeState = (prop) => {
+const changePlantState = (prop) => {
   return (value) => {
     return (state) => ({
       ...state,
-      [prop]: (state[prop] || 0) + value,
+      [prop] : (state[prop] || 0) + value
     });
   };
 };
 
-// We create four functions using our function factory. We could easily create many more.
-const props = {};
-// const blueFood = changeState("soil")(5);
-// const superWater = changeState("water")(5);
+// This function stores the list of plants.
+
+const storeListState = () => {
+  let currentState = [];
+  return (stateChangeFunction = state => state) => {
+    const newState = stateChangeFunction(currentState);
+    currentState = [...newState];
+    return newState;
+  };
+};
+
+// This is a function factory, whose return function gets passed into the return function of storeListState, and becomes the stateChangeFunction.
+
+const changeListState = (plant) => {
+  return (state) => ([
+    ...state,
+    plant
+  ]);
+};
+
+const blueFood = changePlantState("soil")(5);
 
 $(document).ready(function () {
+
+  const listControl = storeListState();
+
+  $('#new-plant').click(function() {
+    console.log("Hello");
+    const plantControl = storePlantState();
+    const addPlant = changeListState(plantControl);
+    const newList = listControl(addPlant);
+    $("#soil-value").append(`
+      <div>
+        <p id=”soil-value-${newList.length - 1}”></p>
+        <p id=”feed-${newList.length - 1}” >Feed-${newList.length - 1}</p>
+      </div>
+    `);
+  });
+  
   // This function has side effects because we are using jQuery. Manipulating the DOM will always be a side effect. Note that we only use one of our functions to alter soil. You can easily add more.
-  let index = 2;
-  function createClickForButton(buttonText) {
-    $(`#${buttonText}`).on("click", function () {
-      const index = $(".plant").attr("id");
-      const newState = plants[index - 1](props[buttonText]);
-      $(`#${buttonText}-value`).text(`${buttonText}: ${newState[buttonText]}`);
-    });
-  }
-
-  $("#add-prop").on("click", function () {
-    const index = $(".plant").attr("id");
-    const property = $("#prop").val();
-    const value = parseInt($("#value").val());
-    const newState = plants[index - 1](changeState(property)(0));
-    $("#newAdds").append(`<h3><div id="${property}-value">${property}: ${newState[property]}</div></h3>`);
-    $("#prop-button").append(`<button id=${property} class="btn btn-success mx-3">Add ${property}</button>`);
-
-    props[property] = changeState(property)(value);
-    createClickForButton(property);
+  
+  $('#feed').click(function() {
+    console.log("Matt");
+    const id = $('#plantNumber').val();
+    console.log(id);
+    const stateControl = listControl()[id];
+    console.log(stateControl);
+    const newState = stateControl(blueFood);
+    console.log(newState);
+    $(`#soil-value-${id}`).val(`Soil: ${newState.soil}`);
+    console.log($(`#soil-value-${id}`).val());
   });
 
-  $("#new").on("click", function () {
-    $("#plants-list").append(`<option value=${index}>Plant ${index}</option>`);
-    plants.push(storeState());
-    index++;
-  });
-
-  $("#plants-list").on("change", function () {
-    $("#newAdds").empty();
-    $("#prop-button").empty();
-    let index = $("#plants-list :selected").val();
-    for (const [key] of Object.entries(plants[index - 1]())) {
-      let dynamicVal = plants[index - 1]()[key];
-      console.log(dynamicVal + " key here: " + key);
-      $("#newAdds").append(`<h3><div id="${key}-value">${key}: ${dynamicVal}</div></h3>`);
-      $("#prop-button").append(`<button id=${key} class="btn btn-success me-3">Add ${key}</button>`);
-      createClickForButton(key);
-    }
-    $("#name").text(`Plant ${index} Values`);
-    $(".plant").attr("id", `${index}`);
-  });
 });
